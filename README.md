@@ -18,4 +18,4 @@ This repository contains a Pytorch implementation of the
 
 ### Notes to self
 0. Finish readme with usage (env, train, test)
-1. Main components - encoder, decoder, multi-head attention
+1. Main components - encoder, decoder, multi-head attention, feedforward layer

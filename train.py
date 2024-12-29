@@ -1,7 +1,6 @@
 import os
 import torch
 from argparse import ArgumentParser
-from model.transformer import Transformer
 
 
 def main():
@@ -21,8 +20,8 @@ def main():
   device = "cuda" if torch.cuda.is_available() else "mps"
 
   # Create model output path
-  if not os.path.exists(args.output_dir + '/last/models'):
-    os.makedirs(args.output_dir + '/last/models')
+  if not os.path.exists(args.output_dir):
+    os.makedirs(args.output_dir)
 
   # Create data path
   if not os.path.exists(args.data_dir):
@@ -31,7 +30,6 @@ def main():
   # Prepares train, val datasets
 
   # Init models
-  model = Transformer()
 
   # Load checkpoint if exists
 
