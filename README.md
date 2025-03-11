@@ -6,8 +6,8 @@ Implementation of "Attention Is All You Need".
 
 ## TODO
 
-[ ] Encoder
-[ ] Decoder
+- [ ] Encoder
+- [ ] Decoder
 
 ## Citations
 
