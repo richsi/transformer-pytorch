@@ -20,7 +20,7 @@ class SinusoidalPositionalEncoding(nn.Module):
     self.pe.requires_grad = False # no need to compute gradient
 
     position = torch.arange(max_len, dtype=torch.float).unsqueeze(dim=1) # shape (max_len, 1)
-    _2i = torch.arange(d_model, step=2, dtype=torch.float, device=device) # i is index of model
+    _2i = torch.arange(0, d_model, step=2, dtype=torch.float, device=device) # i is index of model
 
     self.pe[:, 0::2] = torch.sin(position / 10000 ** (_2i / d_model))
     self.pe[:, 1::2] = torch.cos(position / 10000 ** (_2i / d_model))
