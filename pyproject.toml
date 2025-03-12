@@ -26,3 +26,8 @@ Repository = "https://github.com/richsi/transformer-pytorch"
 test = [
   "pytest"
 ]
+
+[tool.pytest.ini_options]
+pythonpath = [
+  "."
+]
