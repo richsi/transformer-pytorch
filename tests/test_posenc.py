@@ -1,7 +1,7 @@
 import torch
 import pytest
 
-from src.transformer.positional_encoding import SinusoidalPositionalEncoding 
+from transformer.positional_encoding import SinusoidalPositionalEncoding 
 
 @pytest.fixture
 def pos_enc_cpu():
