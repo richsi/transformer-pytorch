@@ -13,3 +13,5 @@ dropout = 0.1
 
 src_data = torch.randint(1, src_vocab_size, (64, max_seq_len)) # (batch_size, seq_length)
 tgt_data = torch.randint(1, tgt_vocab_size, (64, max_seq_len)) # (batch_size, seq_length)
+
+print(src_data)
