@@ -8,6 +8,7 @@ Implementation of [Attention Is All You Need](https://arxiv.org/abs/1706.03762).
 
 - [ ] Encoder
 - [ ] Decoder
+- [ ] Compare and contrast sinusoidal positionale encoding vs rotary positional encoding (RoPE)
 
 ## Citations
 
