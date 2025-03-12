@@ -7,8 +7,7 @@ from transformer.positional_encoding import SinusoidalPositionalEncoding
 def pos_enc_cpu():
   max_len = 100
   d_model = 16
-  device = "cpu"
-  return SinusoidalPositionalEncoding(max_len, d_model, device)
+  return SinusoidalPositionalEncoding(max_len, d_model).to("cpu")
 
 def test_pe_shape(pos_enc_cpu):
   max_len = 100
