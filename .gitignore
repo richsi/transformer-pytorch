@@ -1,2 +1,5 @@
 # envs
 .venv
+
+# unit testing
+.pytest_cache
