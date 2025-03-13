@@ -20,10 +20,20 @@ class MultiHeadAttention(nn.Module):
     self.d_model = d_model 
     self.num_heads = num_heads
 
+    self.w_q = nn.Linear(d_model, d_model)
+    self.w_k = nn.Linear(d_model, d_model)
+    self.w_v = nn.Linear(d_model, d_model)
+
 
   def forward(self, x):
     # x.shape = (batch_size, seq_len, d_model)
     raise NotImplementedError("MultiHeadAttention forward pass not implemented.")
+
+  def split(self, x):
+    raise NotImplementedError("MultiHeadAttention split not implemented.")
+
+  def concat(self, x):
+    raise NotImplementedError("MultiHeadAttention concat not implemented.")
 
 
 
@@ -57,7 +67,7 @@ def scaled_dot_product_attention(
   if mask is not None: # TODO: apply masking to scores
     pass
 
-  attn = torch.softmax(scores, dim=1)
+  attn = torch.softmax(scores, dim=1) # weights
 
   if dropout > 0: # TODO: apply dropout to attn
     pass
