@@ -9,4 +9,5 @@ class LayerNormalization(nn.Module):
     self.bias = nn.Parameter(torch.zeros(1)) # additive
 
   def forward(self, x):
-    pass
+    # x: (batch, seq_len, hidden_size)
+    mu = torch.mean(x)
