@@ -24,7 +24,7 @@ class SinusoidalPositionalEncoding(nn.Module):
     self.pe[:, 0::2] = torch.sin(position * div_term) 
     self.pe[:, 1::2] = torch.cos(position * div_term)
 
-    self.pe.unsqueeze(dim=0) # (1, seq_len, d_model) batching
+    self.pe = self.pe.unsqueeze(dim=0) # (1, seq_len, d_model) batching
     # self.register_buffer('pe', pe)
 
 
