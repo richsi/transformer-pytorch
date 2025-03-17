@@ -18,12 +18,12 @@ class MultiHeadAttention(nn.Module):
     self.num_heads = num_heads
     self.d_k = d_model // num_heads
 
-    self.linear_q = nn.Linear(d_model, d_model)
-    self.linear_k = nn.Linear(d_model, d_model)
-    self.linear_v = nn.Linear(d_model, d_model)
+    self.W_q = nn.Linear(d_model, d_model) # transforms input to Q of all heads
+    self.W_k = nn.Linear(d_model, d_model)
+    self.W_v = nn.Linear(d_model, d_model)
+    self.W_o = nn.Linear(d_model, d_model) # output projection
 
-    self.linear_out = nn.Linear(d_model, d_model)
-    self.dropout = dropout
+    self.dropout = nn.Dropout(p=dropout)
 
   def forward(
     self,
@@ -45,19 +45,23 @@ class MultiHeadAttention(nn.Module):
     """
     batch_size = query.size(0)
 
-    # 1. linear projection and splitting into multiple heads (batch_size, seq_len, d_model)
-    Q = self.linear_q(query) # affine transformation
-    K = self.linear_k(key)
-    V = self.linear_v(value)
+    # Linear projections (batch, seq_len, d_model) -> (batch_ seq_len, d_model)
+    Q = self.W_q(query)
+    K = self.W_k(key)
+    V = self.W_v(value)
 
-    # reshape to (batch_size, seq_len, num_heads, d_k) then tranpose to (batch_size, num_heads, seq_len, d_k)
+    # Split into n_heads and reshape for attention 
+    Q = Q.view(batch_size, -1, self.n_heads, self.d_head).transpose(1, 2) # after split (batch, n_heads, seq_len, d_head)
+    K = K.view(batch_size, -1, self.n_heads, self.d_head).transpose(1, 2)
+    V = V.view(batch_size, -1, self.n_heads, self.d_head).transpose(1, 2)
 
-    # 2. apply scaled dot product attention for each head in parallel
-    # input (..., seq_len, d_k), output (.., seq_len, d_k)
+    # Apply scaled dot product attention on each head
+    attn_output, attn_weights = MultiHeadAttention.scaled_dot_product_attention(Q, K, V, mask) 
 
-    # 3. concatenate the heads together
+    # TODO: Combine heads
 
-    # 4. apply final linear projection
+
+    return self.W_o(attn_output)
 
 
   @staticmethod
@@ -65,7 +69,8 @@ class MultiHeadAttention(nn.Module):
     Q: torch.Tensor,
     K: torch.Tensor,
     V: torch.Tensor,
-    mask: Optional[torch.Tensor] = None
+    mask: Optional[torch.Tensor] = None,
+    dropout: Optional[torch.Tensor] = 0.1
   ) -> torch.Tensor:
     """
     Computes scaled dot product attention.
@@ -75,6 +80,7 @@ class MultiHeadAttention(nn.Module):
       K (torch.Tensor): Key tensor of shape (..., seq_len_k, d_k)
       V (torch.Tensor): Value tensor of shape (..., seq_len_v, d_v); typically seq_len_v == seq_len_k
       mask (Optional[torch.Tensor]): A tensor broadcastable to shape (..., seq_len_q, seq_len_k) that prevents attention to certain positions
+      dropout (Optional[torch.Tensor]): Dropout probability
 
     Returns:
       output (torch.Tensor): Result of attention, of shape (..., seq_len_q, d_v)
@@ -91,6 +97,10 @@ class MultiHeadAttention(nn.Module):
       scores = scores.masked_fill(mask == 0, float('-inf'))
 
     attn = torch.softmax(scores, dim=1) # shape (batch, seq_len_q, seq_len_k)
+
+    if dropout is not None:
+      d = nn.Dropout(p=dropout)
+      attn = d(attn)
 
     # if attn shape (..., seq_len, seq_len) and value shape (..., seq_len, d_v),
     # then output shape (..., seq_len, d_v)
