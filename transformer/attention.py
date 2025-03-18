@@ -16,7 +16,7 @@ class MultiHeadAttention(nn.Module):
 
     self.d_model = d_model 
     self.num_heads = num_heads
-    self.d_k = d_model // num_heads
+    self.d_head = d_model // num_heads
 
     self.W_q = nn.Linear(d_model, d_model) # transforms input to Q of all heads
     self.W_k = nn.Linear(d_model, d_model)
@@ -45,23 +45,31 @@ class MultiHeadAttention(nn.Module):
     """
     batch_size = query.size(0)
 
-    # Linear projections (batch, seq_len, d_model) -> (batch_ seq_len, d_model)
+    # linear projections (batch, seq_len, d_model) -> (batch_ seq_len, d_model)
     Q = self.W_q(query)
     K = self.W_k(key)
     V = self.W_v(value)
 
-    # Split into n_heads and reshape for attention 
+    # split into n_heads and reshape for attention 
     Q = Q.view(batch_size, -1, self.n_heads, self.d_head).transpose(1, 2) # after split (batch, n_heads, seq_len, d_head)
     K = K.view(batch_size, -1, self.n_heads, self.d_head).transpose(1, 2)
     V = V.view(batch_size, -1, self.n_heads, self.d_head).transpose(1, 2)
 
-    # Apply scaled dot product attention on each head
-    attn_output, attn_weights = MultiHeadAttention.scaled_dot_product_attention(Q, K, V, mask) 
+    # merge batch and n_heads for efficiency: treat each head as a separate batch
+    Q_flat = Q.reshape(batch_size * self.n_heads, -1, self.d_head)
+    K_flat = K.reshape(batch_size * self.n_heads, -1, self.d_head)
+    V_flat = V.reshape(batch_size * self.n_heads, -1, self.d_head)
 
-    # TODO: Combine heads
+    if mask is not None:
+      mask = mask.repeat_interleave(self.n_heads, dim=0)
+    attn_output, attn_weights = MultiHeadAttention.scaled_dot_product_attention(Q_flat, K_flat, V_flat, mask)
+    # attn_output (batch * n_heads, seq_len_q, d_head)
+    # reshape attn_output back to (batch_size, n_heads, seq_len, d_head)
+    attn_output = attn_output.view(batch_size, self.n_heads, -1, self.d_head)
+    # concatenate heads: (batch, seq_len, n_heads, d_head) reshape-> (batch, seq_len, n_heads * d_head)
+    attn_output = attn_output.transpose(1, 2).reshape(batch_size, -1, self.d_model)
 
-
-    return self.W_o(attn_output)
+    return self.W_o(attn_output) # (batch, seq_len, d_model)
 
 
   @staticmethod
