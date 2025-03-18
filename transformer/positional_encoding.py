@@ -10,7 +10,7 @@ class SinusoidalPositionalEncoding(nn.Module):
     d_model (int): Dimension of models vector embedding
   """
 
-  def __init__(self, seq_len: int, d_model: str, dropout: Optional[float] = 0.0):
+  def __init__(self, seq_len: int, d_model: str, dropout: Optional[float] = 0.1):
     super().__init__()
 
     self.dropout = nn.Dropout(dropout)
